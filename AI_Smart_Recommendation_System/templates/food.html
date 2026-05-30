@@ -1,0 +1,122 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h2>Food Recommendations</h2>
+<div class="form-container">
+    <form id="food-form">
+        <div class="form-group">
+            <label for="category">Select Cuisine/Category:</label>
+            <select id="category" name="category" class="form-control" required>
+                <option value="Seafood">Seafood</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Chicken">Chicken</option>
+                <option value="Beef">Beef</option>
+                <option value="Dessert">Dessert</option>
+                <option value="Pasta">Pasta</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">Get Recommendations</button>
+    </form>
+</div>
+
+<div class="loading-spinner" id="loading-food" style="display: none;">
+    <div class="spinner"></div>
+    <p>AI is thinking...</p>
+</div>
+
+<h3 id="rec-title" style="display: none;">Recommended Results</h3>
+<div id="food-results" class="results-grid"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $('#food-form').on('submit', function(e) {
+        e.preventDefault();
+        $('#loading-food').show();
+        $('#food-results').empty();
+        $('#rec-title').show();
+        
+        $('html, body').animate({
+            scrollTop: $("#loading-food").offset().top - 50
+        }, 500);
+        
+        $.ajax({
+            url: '/recommend/food',
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                $('#loading-food').hide();
+                if(response.length > 0) {
+                    response.forEach(function(food) {
+                        let html = `
+                            <div class="result-card card">
+                                <img src="${food.thumb}" alt="${food.name}" class="card-img" onerror="this.src='https://via.placeholder.com/300x300?text=${food.name}'">
+                                <div class="card-content">
+                                    <h3>${food.name}</h3>
+                                    <p><strong>Category:</strong> ${food.category}</p>
+                                    <p class="match-score" style="color: #4CAF50; font-weight: bold;">${food.match_score}</p>
+                                    <div class="actions" style="margin-top: 10px; display: flex; gap: 10px; flex-direction: column;">
+                                        <button class="btn btn-fav" data-id="${food.id}" data-title="${food.name}" data-img="${food.thumb}">❤️ Favorite</button>
+                                        <div style="display: flex; align-items: center; gap: 5px;">
+                                            <select class="rating-val" style="padding: 5px;">
+                                                <option value="5">⭐⭐⭐⭐⭐</option>
+                                                <option value="4">⭐⭐⭐⭐</option>
+                                                <option value="3">⭐⭐⭐</option>
+                                                <option value="2">⭐⭐</option>
+                                                <option value="1">⭐</option>
+                                            </select>
+                                            <button class="btn btn-rate" data-id="${food.id}">Rate</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        $('#food-results').append(html);
+                    });
+                } else {
+                    $('#food-results').append('<p>No recommendations found based on your preferences.</p>');
+                }
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-fav', function() {
+        let btn = $(this);
+        let data = {
+            item_id: btn.data('id'),
+            item_type: 'food',
+            title: btn.data('title'),
+            image_url: btn.data('img')
+        };
+        $.ajax({
+            url: '/api/favorite',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                alert(response.message);
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-rate', function() {
+        let btn = $(this);
+        let id = btn.data('id');
+        let rating = btn.siblings('.rating-val').val();
+        let data = {
+            item_id: id,
+            item_type: 'food',
+            rating: rating
+        };
+        $.ajax({
+            url: '/api/rate',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                alert(response.message);
+            }
+        });
+    });
+</script>
+{% endblock %}

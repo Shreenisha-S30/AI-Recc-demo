@@ -1,0 +1,7 @@
+name,cuisine,is_veg,spice_level,meal_type,description,image_url
+"Tikka Masala","Indian",0,"Medium","Dinner","Chunks of roasted marinated chicken in a spiced curry sauce.","https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=500&q=60"
+"Paneer Butter Masala","Indian",1,"Mild","Dinner","Paneer cooked in a rich and creamy gravy of tomato, butter, and cashew nuts.","https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=500&q=60"
+"Margherita Pizza","Italian",1,"Mild","Lunch","Classic pizza with tomatoes, mozzarella cheese, and fresh basil.","https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=500&q=60"
+"Spaghetti Carbonara","Italian",0,"Mild","Dinner","A classic Italian pasta dish made with eggs, cheese, pancetta, and black pepper.","https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=500&q=60"
+"Kung Pao Chicken","Chinese",0,"Hot","Dinner","A spicy, stir-fried Chinese dish made with cubes of chicken, peanuts, vegetables, and chili peppers.","https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=500&q=60"
+"Vegetable Spring Rolls","Chinese",1,"Mild","Snacks","Crispy rolls filled with shredded vegetables and served with a sweet and sour dipping sauce.","https://images.unsplash.com/photo-1549488344-c7117ce62078?auto=format&fit=crop&w=500&q=60"

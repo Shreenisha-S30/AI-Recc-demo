@@ -1,0 +1,8 @@
+Flask
+pandas
+numpy
+scikit-learn
+requests
+python-dotenv
+flask-login
+flask-bcrypt

@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to the AI Smart Recommendation System</h1>
+    <p>Discover your next favorite movie, book, or food using advanced AI algorithms.</p>
+    
+    <div class="dashboard-cards">
+        <a href="{{ url_for('movies') }}" class="card dashboard-card">
+            <i class="fas fa-film fa-3x"></i>
+            <h3>Movies</h3>
+            <p>Get personalized movie recommendations based on content.</p>
+        </a>
+        <a href="{{ url_for('books') }}" class="card dashboard-card">
+            <i class="fas fa-book fa-3x"></i>
+            <h3>Books</h3>
+            <p>Find books similar to your favorites.</p>
+        </a>
+        <a href="{{ url_for('food') }}" class="card dashboard-card">
+            <i class="fas fa-utensils fa-3x"></i>
+            <h3>Food</h3>
+            <p>Discover new dishes tailored to your tastes.</p>
+        </a>
+    </div>
+</section>
+{% endblock %}

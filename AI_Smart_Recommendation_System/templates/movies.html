@@ -1,0 +1,165 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h2>Movie Recommendations</h2>
+<div class="form-container">
+    <form id="movie-search-form">
+        <div class="form-group">
+            <label for="query">Search a movie:</label>
+            <input type="text" id="query" name="query" class="form-control" placeholder="e.g. Inception..." required>
+        </div>
+        <button type="submit" class="btn">Search</button>
+    </form>
+</div>
+
+<div id="search-results" class="results-grid" style="margin-bottom: 2rem;"></div>
+
+<div class="loading-spinner" id="loading-movie" style="display: none;">
+    <div class="spinner"></div>
+    <p>AI is thinking...</p>
+</div>
+
+<h3 id="rec-title" style="display: none;">Recommended For You</h3>
+<div id="movie-results" class="results-grid"></div>
+
+{% if popular %}
+<div id="popular-section">
+    <h3>Trending Movies</h3>
+    <div class="results-grid">
+        {% for movie in popular %}
+        <div class="result-card card">
+            <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}" class="card-img" onerror="this.src='https://via.placeholder.com/500x750?text=No+Poster'">
+            <div class="card-content">
+                <h3>{{ movie.title }}</h3>
+                <button class="btn get-recs-btn" data-id="{{ movie.id }}" style="margin-top: 10px;">Get Recommendations</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $('#movie-search-form').on('submit', function(e) {
+        e.preventDefault();
+        $('#search-results').empty();
+        $('#popular-section').hide();
+        
+        $.ajax({
+            url: '/api/movie/search',
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.length > 0) {
+                    response.forEach(function(movie) {
+                        let html = `
+                            <div class="result-card card">
+                                <img src="${movie.poster}" alt="${movie.title}" class="card-img" onerror="this.src='https://via.placeholder.com/500x750?text=No+Poster'">
+                                <div class="card-content">
+                                    <h3>${movie.title}</h3>
+                                    <button class="btn get-recs-btn" data-id="${movie.id}" style="margin-top: 10px;">Get Recommendations</button>
+                                </div>
+                            </div>
+                        `;
+                        $('#search-results').append(html);
+                    });
+                } else {
+                    $('#search-results').append('<p>No movies found.</p>');
+                }
+            }
+        });
+    });
+
+    $(document).on('click', '.get-recs-btn', function() {
+        let movieId = $(this).data('id');
+        $('#loading-movie').show();
+        $('#movie-results').empty();
+        $('#rec-title').show();
+        
+        $('html, body').animate({
+            scrollTop: $("#loading-movie").offset().top - 50
+        }, 500);
+        
+        $.ajax({
+            url: '/recommend/movie',
+            method: 'POST',
+            data: { movie_id: movieId },
+            success: function(response) {
+                $('#loading-movie').hide();
+                if(response.length > 0) {
+                    response.forEach(function(movie) {
+                        let html = `
+                            <div class="result-card card">
+                                <img src="${movie.poster_path}" alt="${movie.title}" class="card-img" onerror="this.src='https://via.placeholder.com/500x750?text=No+Poster'">
+                                <div class="card-content">
+                                    <h3>${movie.title}</h3>
+                                    <p class="match-score" style="color: #4CAF50; font-weight: bold;">${movie.match_score}</p>
+                                    <p class="description">${movie.overview ? movie.overview.substring(0, 100) : ''}...</p>
+                                    <div class="actions" style="margin-top: 10px; display: flex; gap: 10px; flex-direction: column;">
+                                        <button class="btn btn-fav" data-id="${movie.id}" data-title="${movie.title}" data-img="${movie.poster_path}">❤️ Favorite</button>
+                                        <div style="display: flex; align-items: center; gap: 5px;">
+                                            <select class="rating-val" style="padding: 5px;">
+                                                <option value="5">⭐⭐⭐⭐⭐</option>
+                                                <option value="4">⭐⭐⭐⭐</option>
+                                                <option value="3">⭐⭐⭐</option>
+                                                <option value="2">⭐⭐</option>
+                                                <option value="1">⭐</option>
+                                            </select>
+                                            <button class="btn btn-rate" data-id="${movie.id}">Rate</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        $('#movie-results').append(html);
+                    });
+                } else {
+                    $('#movie-results').append('<p>No recommendations found.</p>');
+                }
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-fav', function() {
+        let btn = $(this);
+        let data = {
+            item_id: btn.data('id'),
+            item_type: 'movie',
+            title: btn.data('title'),
+            image_url: btn.data('img')
+        };
+        $.ajax({
+            url: '/api/favorite',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                alert(response.message);
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-rate', function() {
+        let btn = $(this);
+        let id = btn.data('id');
+        let rating = btn.siblings('.rating-val').val();
+        let data = {
+            item_id: id,
+            item_type: 'movie',
+            rating: rating
+        };
+        $.ajax({
+            url: '/api/rate',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                alert(response.message);
+            }
+        });
+    });
+</script>
+{% endblock %}
